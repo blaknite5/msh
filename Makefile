@@ -9,4 +9,4 @@ msh: $(OBJ)
 	gcc -o $@ $^ $(CFLAGS)
 
 clean: 
-	rm $(OBJ)
+	rm $(OBJ) msh
