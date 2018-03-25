@@ -11,5 +11,7 @@ int parse(char *, char ***);
 int add_history(char *, char ***, int);
 void print_history(char ***, int);
 int exec_last(char **, char ***, int, int *);
+int exec_old(char **, char ***, int, int *, int);
+int parse_cmdnum(char *);
 
 #endif

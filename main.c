@@ -9,8 +9,8 @@ int main()
 {
     // Variable Declerations
     int argc;
-    int history_count = 0;          // number of commands entered
-    int inputflag = 0;              // condition flag      
+    int history_count = 0;                      // number of commands entered
+    int inputflag = 0;                          // condition flag      
     char **argv;
     char **history = malloc(1 * sizeof(*history));
     char *buf = NULL;
@@ -18,19 +18,29 @@ int main()
     // While loop makes shell run until exit is typed
     while(1)
     {
-        inputflag = getinput(&buf); // inputflag set here 
+        inputflag = getinput(&buf);             // inputflag set here 
         argc = parse(buf, &argv);
         history_count = add_history(buf, &history, history_count);
 
-        if(inputflag == 1) {          // exit condition
+        if(inputflag == 1) {                    // 'exit' command
             free(argv);
             free(history);
             exit(0);
-        } else if(inputflag == 2)          // history command
+        } else if(inputflag == 2)               // 'history' command
             print_history(&history, history_count);
-        else if(inputflag == 3) {
+        else if(inputflag == 3) {               // '!(#)' command
             int exitflag = 0;
             history_count = exec_last(&buf, &history, history_count, &exitflag);
+            if(exitflag == 0) {
+                argc = parse(buf, &argv);
+                history_count = add_history(buf, &history, history_count);
+                run(argv);
+            }
+        } else if(inputflag == 4) {
+            int number;
+            int exitflag = 0;
+            number = parse_cmdnum(buf);
+            history_count = exec_old(&buf, &history, history_count, &exitflag, number);
             if(exitflag == 0) {
                 argc = parse(buf, &argv);
                 history_count = add_history(buf, &history, history_count);

@@ -33,6 +33,7 @@ int getinput(char **s)
     // Returns 1 if 'exit' is entered
     // Returns 2 if 'history' is entered
     // Returns 3 if '!!' is entered
+    // Returns 4 if '!(#)' is entered
     // Else returns 0
     char temp[max];
     int c;
@@ -52,14 +53,15 @@ int getinput(char **s)
         return 0;
     temp[count] = '\0';
     *s = temp;
-    // determines if the exit command was typed
-    // if yes then return 1
-    if(strcmp(temp, "exit") ==0)
+    //check for return conditions
+    if(strcmp(temp, "exit") ==0)            
         return 1;
-    else if (strcmp(temp, "history") ==0)
+    else if (strcmp(temp, "history") ==0)   
         return 2;
-    else if (strcmp(temp, "!!") ==0)
+    else if (strcmp(temp, "!!") ==0)      
         return 3;
+    else if ( temp[0] == '!')
+        return 4;
     else 
         return 0;
 }
@@ -137,6 +139,7 @@ int parse(char *s, char ***args)
 
 int add_history(char *s, char ***history, int count)
 {
+    // Function for creating the history data structure used for storing previous commands
     char **temp = *history;
     char *string = s;
     count = count + 1;
@@ -149,6 +152,7 @@ int add_history(char *s, char ***history, int count)
 
 void print_history(char ***s, int count)
 {
+    // Function for priting the history data structure
     char **temp = *s;
     int j, i = 0;
     if(count > 20) {
@@ -164,23 +168,63 @@ void print_history(char ***s, int count)
 
 int exec_last(char **buf, char ***hist, int count, int *shellflag)
 {
+    // Fuction for executing the last command
     char **history = *hist;
-    if(count == 1) {
+    if(count == 1) {                                    // if first command do nothing
         *shellflag = 1;
         return count;
     }
-    if(strcmp(history[count -2 ], "!!") == 0) {
+    if(strcmp(history[count -2 ], "!!") == 0) {         // if last command was '!!' do nothing 
         *shellflag = 1;
         return count;
     }
-    if(strcmp(history[count -2 ], "history") == 0) {
+    if(strcmp(history[count -2 ], "history") == 0) {    // if last command was 'history' run it 
        count = add_history(history[count -2 ], &history, count); 
        print_history(&history, count);
        *shellflag =1;
     }
-    else
+    else                                                // else set buffer for previous command
     {
         *buf = history[count - 2 ];    
     }
     return count;           
+}
+
+int exec_old(char **buf, char ***hist, int count, int *shellflag, int number)
+{
+    // Function for executing a specific command from the history data structure
+    char **history = *hist;
+    if(count < 1) {                                  // if command to run is the first or less do 
+        *shellflag = 1;                                 // do nothing
+        return count;
+    }
+    if(strcmp(history[number - 1], "!!") == 0) {             // if the command was '!!' do nothing 
+        *shellflag = 1;
+        return count;
+    }
+    if(strcmp(history[number- 1], "history") == 0) {        // if the command was 'history' run it 
+       count = add_history(history[number - 1], &history, count); 
+       print_history(&history, count);
+       *shellflag =1;
+    }
+    else                                                // else set buffer for the command
+    {
+        *buf = history[number - 1];    
+    }
+    return count;           
+}
+
+int parse_cmdnum(char *s)
+{
+    int i = 1;
+    int j = 0;
+    char temp[25];
+    while(s[i] != '\0'){
+        temp[j] = s[i];    
+        temp[j + 1] = '\0';
+        j = j + 1;
+        i = i + 1;
+    }
+    i = atoi(temp);
+    return i;
 }
